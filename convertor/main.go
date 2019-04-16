@@ -39,9 +39,12 @@ func main() {
 
 	go func() {
 		for {
+			fmt.Println("Wait new task...")
 			v := <-queue
+			fmt.Println("Getted new task")
 			// Start transcoder process with progress checking
-			fmt.Println("Input file:", v.InputFile, "Out file:", v.OutFile)
+			fmt.Println("Input file:", v.InputFile)
+			fmt.Println("Out file:", v.OutFile)
 			done := trc.Run(v.InputFile, v.OutFile)
 
 			progress := trc.Output()
@@ -59,6 +62,7 @@ func main() {
 				fmt.Println("Error: ", err)
 				os.Exit(1)
 			}
+			fmt.Println()
 		}
 	}()
 
