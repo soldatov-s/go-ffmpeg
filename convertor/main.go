@@ -31,11 +31,15 @@ func main() {
 		close(exit)
 	}()
 
-	queue := ffmpeg.NewQueue()
-	queue.Push(1, ffmpeg.NewQueueItem("/home/ssoldatov/test/inputfile.avi", "/home/ssoldatov/test/outfile.mp4"))
+	queue := make(chan ffmpeg.QueueItem)
 
 	go func() {
-		for k, v := range queue.Items {
+		queue <- ffmpeg.NewQueueItem("/home/ssoldatov/test/inputfile.avi", "/home/ssoldatov/test/outfile.mp4")
+	}()
+
+	go func() {
+		for {
+			v := <-queue
 			// Start transcoder process with progress checking
 			fmt.Println("In file:", v.InFile, "Out file:", v.OutFile)
 			done := trc.Run(v.InFile, v.OutFile)
@@ -51,7 +55,10 @@ func main() {
 
 			// Wait when transcoding process to end
 			err = <-done
-			queue.Remove(k)
+			if err != nil {
+				fmt.Println("Error: ", err)
+				os.Exit(1)
+			}
 		}
 	}()
 
