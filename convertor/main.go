@@ -41,8 +41,8 @@ func main() {
 		for {
 			v := <-queue
 			// Start transcoder process with progress checking
-			fmt.Println("In file:", v.InFile, "Out file:", v.OutFile)
-			done := trc.Run(v.InFile, v.OutFile)
+			fmt.Println("Input file:", v.InputFile, "Out file:", v.OutFile)
+			done := trc.Run(v.InputFile, v.OutFile)
 
 			progress := trc.Output()
 
