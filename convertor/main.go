@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/soldatov-s/go-ffmpeg"
 )
@@ -34,8 +35,8 @@ func main() {
 		close(exit)
 	}()
 
-	queue := make(chan *ffmpeg.QueueItem)
-
+	queue := make(chan *ffmpeg.RedisTask)
+	next := make(chan *struct{})
 	go func() {
 		var i int
 		for {
@@ -43,12 +44,17 @@ func main() {
 			if err != nil {
 				fmt.Println("Error: ", err)
 			}
-			queue <- task
+			if task == nil {
+				time.Sleep(1 * time.Second)
+				continue
+			}
 			fmt.Printf("Add new task%d\n", i)
 			i++
 			if i == math.MaxInt64 {
 				i = 0
 			}
+			queue <- task
+			next <- new(struct{})
 		}
 	}()
 
@@ -63,6 +69,7 @@ func main() {
 			done := trc.Run(v.InputFile, v.OutFile)
 
 			progress := trc.Output()
+			dbcl.BusyTask(v)
 
 			for msg := range progress {
 				if stop {
@@ -77,7 +84,9 @@ func main() {
 				fmt.Println("Error: ", err)
 				os.Exit(1)
 			}
+			dbcl.CompleteTask(v)
 			fmt.Println()
+			<-next
 		}
 	}()
 
