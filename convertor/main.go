@@ -3,6 +3,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"os/signal"
 	"syscall"
@@ -19,6 +20,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	dbcl := ffmpeg.NewRedisClient("localhost:6379", "", 0)
+
 	stop := false
 	exit := make(chan struct{})
 	closeSignal := make(chan os.Signal)
@@ -31,10 +34,22 @@ func main() {
 		close(exit)
 	}()
 
-	queue := make(chan ffmpeg.QueueItem)
+	queue := make(chan *ffmpeg.QueueItem)
 
 	go func() {
-		queue <- ffmpeg.NewQueueItem("/home/ssoldatov/test/inputfile.avi", "/home/ssoldatov/test/outfile.mp4")
+		var i int
+		for {
+			task, err := dbcl.GetTask()
+			if err != nil {
+				fmt.Println("Error: ", err)
+			}
+			queue <- task
+			fmt.Printf("Add new task%d\n", i)
+			i++
+			if i == math.MaxInt64 {
+				i = 0
+			}
+		}
 	}()
 
 	go func() {

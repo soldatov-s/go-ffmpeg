@@ -7,6 +7,6 @@ type QueueItem struct {
 	OutFile   string
 }
 
-func NewQueueItem(inFile, outFile string) QueueItem {
-	return QueueItem{InputFile: inFile, OutFile: outFile}
+func NewQueueItem(inFile, outFile string) *QueueItem {
+	return &QueueItem{InputFile: inFile, OutFile: outFile}
 }
