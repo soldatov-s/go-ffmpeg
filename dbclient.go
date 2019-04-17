@@ -46,6 +46,12 @@ func (e *RedisTasks) UnmarshalBinary(data []byte) error {
 	return nil
 }
 
+// Get from redis db task
+// key as "tasks:taskID", where ID is INT type
+// fields: inputfile, outfile, state.
+// state: new - new task, busy - task in progress, completed - task completed
+// redis-cli: hmset tasks:task1 outfile /home/ssoldatov/test/outfile.avi
+//   inputfile /home/ssoldatov/test/inputfile.avi state new
 func (cl *RedisClient) GetTask() (*QueueItem, error) {
 	val, err := cl.client.Keys("tasks:*").Result()
 	if err != nil {
