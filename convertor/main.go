@@ -3,7 +3,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"os"
 	"os/signal"
 	"syscall"
@@ -38,7 +37,6 @@ func main() {
 	queue := make(chan *ffmpeg.RedisTask)
 	next := make(chan *struct{})
 	go func() {
-		var i int
 		for {
 			task, err := dbcl.GetTask()
 			if err != nil {
@@ -48,11 +46,7 @@ func main() {
 				time.Sleep(1 * time.Second)
 				continue
 			}
-			fmt.Printf("Add new task%d\n", i)
-			i++
-			if i == math.MaxInt64 {
-				i = 0
-			}
+			fmt.Println("Add", task.GetName())
 			queue <- task
 			next <- new(struct{})
 		}
