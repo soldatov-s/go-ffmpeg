@@ -69,7 +69,7 @@ func main() {
 				if stop {
 					return
 				}
-				fmt.Printf("\rConverted %3.2f%%", msg)
+				fmt.Printf("\rConverted %.2f%%", msg)
 			}
 
 			// Wait when transcoding process to end

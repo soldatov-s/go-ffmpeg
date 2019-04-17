@@ -128,13 +128,14 @@ func (trc Transcoder) Output() <-chan float64 {
 		scanner.Split(split)
 		buf := make([]byte, 2)
 		scanner.Buffer(buf, bufio.MaxScanTokenSize)
-		var Duration string
+		dursec := float64(-1)
 
 		for scanner.Scan() {
 			line := scanner.Text()
-			if Duration == "" {
+			if dursec == -1 {
 				if strings.Contains(line, "Duration:") && strings.Contains(line, "start:") && strings.Contains(line, "bitrate:") {
-					Duration = GetFieldValue(line, ",", "Duration", " ")
+					Duration := GetFieldValue(line, ",", "Duration", " ")
+					dursec = DurToSec(Duration)
 				}
 			}
 
@@ -142,7 +143,6 @@ func (trc Transcoder) Output() <-chan float64 {
 				currentTime := GetFieldValue(line, " ", "time", "=")
 
 				timesec := DurToSec(currentTime)
-				dursec := DurToSec(Duration)
 				//live stream check
 				if dursec != 0 {
 					// Progress calculation
